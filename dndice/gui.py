@@ -3,22 +3,24 @@ from typing import Callable
 import PyQt5.QtCore as qtcore
 import PyQt5.QtGui as qtgui
 import PyQt5.QtWidgets as qt
-from dndice.core import verbose
+from dndice.core import EvalTree, compile
 
 
 class Roller(qt.QDialog):
     def __init__(self):
         super().__init__()
+        self.window().setWindowTitle('Dice roller')
         self.entry = RollInput(self.roll)
+        self.entry.setFocus()
 
-        self.display = qt.QLabel()
+        self.display = RollDisplay()
 
         self.button = qt.QPushButton('Roll')
         self.button.clicked.connect(self.roll)
         self._draw()
 
     def roll(self):
-        self.display.setText(verbose(self.entry.text()))
+        self.display.populate(compile(self.entry.text()))
 
     def _draw(self):
         layout = qt.QGridLayout()
@@ -40,6 +42,21 @@ class RollInput(qt.QLineEdit):
             self.callback()
         else:
             super().keyPressEvent(event)
+
+
+class RollDisplay(qt.QLabel):
+    def __init__(self):
+        super().__init__()
+
+    def populate(self, tree: EvalTree):
+        text = tree.verbose_result()
+        color = 'black'
+        if tree.is_critical():
+            color = 'green'
+        elif tree.is_fail():
+            color = 'red'
+        self.setText(text)
+        self.setStyleSheet('color: {}'.format(color))
 
 
 if __name__ == '__main__':
