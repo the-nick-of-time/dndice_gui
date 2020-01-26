@@ -3,7 +3,10 @@ from typing import Callable
 import PyQt5.QtCore as qtcore
 import PyQt5.QtGui as qtgui
 import PyQt5.QtWidgets as qt
-from dndice.core import EvalTree, compile
+from dndice.lib.evaltree import EvalTree
+from dndice.lib.exceptions import EvaluationError, RollError, ParseError
+
+from dndice import compile
 
 
 class Roller(qt.QDialog):
@@ -20,7 +23,10 @@ class Roller(qt.QDialog):
         self._draw()
 
     def roll(self):
-        self.display.populate(compile(self.entry.text()))
+        try:
+            self.display.populate(compile(self.entry.text()))
+        except ParseError as e:
+            self.display.show_error(e)
 
     def _draw(self):
         layout = qt.QGridLayout()
@@ -47,16 +53,26 @@ class RollInput(qt.QLineEdit):
 class RollDisplay(qt.QLabel):
     def __init__(self):
         super().__init__()
+        self.defaultFont = self.font()
 
     def populate(self, tree: EvalTree):
-        text = tree.verbose_result()
-        color = 'black'
-        if tree.is_critical():
-            color = 'green'
-        elif tree.is_fail():
-            color = 'red'
-        self.setText(text)
-        self.setStyleSheet('color: {}'.format(color))
+        try:
+            text = tree.verbose_result()
+            color = 'black'
+            if tree.is_critical():
+                color = 'green'
+            elif tree.is_fail():
+                color = 'red'
+            self.setText(text)
+            self.setFont(self.defaultFont)
+            self.setStyleSheet('color: {}'.format(color))
+        except EvaluationError as e:
+            self.show_error(e)
+
+    def show_error(self, error: RollError):
+        self.setText(str(error))
+        self.setFont(qtgui.QFont('monospace'))
+        self.setStyleSheet('color: red')
 
 
 if __name__ == '__main__':
