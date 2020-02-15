@@ -1,11 +1,13 @@
 import unittest
 from unittest.mock import MagicMock
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import QApplication
 from dndice.lib.evaltree import EvalTree
 from dndice.lib.exceptions import EvaluationError
 
-from dndice.gui import RollDisplay
+from dndice.gui import RollDisplay, Roller, RollInput
 
 window = QApplication([])
 
@@ -61,27 +63,43 @@ class TestRollDisplay(unittest.TestCase):
         self.assertEqual(self.display.text(), 'Oops')
         self.assertEqual(self.display.styleSheet(), 'color: red')
 
-    def tearDown(self):
-        self.window.closeAllWindows()
-
 
 class TestRollInput(unittest.TestCase):
+    def setUp(self):
+        self.callback = MagicMock()
+        self.input = RollInput(self.callback)
+
     def test_normal_keypress(self):
-        pass
+        QTest.keyPress(self.input, '1')
+        self.assertEqual(self.input.text(), '1')
+        QTest.keyPress(self.input, '2')
+        self.assertEqual(self.input.text(), '12')
 
     def test_enter_keypress(self):
-        pass
+        self.input.setText('12')
+        QTest.keyPress(self.input, Qt.Key_Enter)
+        self.assertEqual(self.input.text(), '12')
+        self.callback.assert_called_once_with()
 
 
 class TestBase(unittest.TestCase):
-    def test_initialize(self):
-        pass
+    def setUp(self):
+        self.app = Roller()
 
     def test_button(self):
-        pass
+        self.app.entry.setText('14')
+        QTest.mouseClick(self.app.button, Qt.LeftButton)
+        self.assertEqual(self.app.display.text(), '14 = 14')
 
     def test_enter(self):
-        pass
+        self.app.entry.setText('14')
+        QTest.keyPress(self.app.entry, Qt.Key_Enter)
+        self.assertEqual(self.app.display.text(), '14 = 14')
+
+    def test_error(self):
+        self.app.entry.setText('14d')
+        QTest.mouseClick(self.app.button, Qt.LeftButton)
+        self.assertEqual(self.app.display.text(), 'Unexpected end of expression.\n    14d\n       ^')
 
 
 if __name__ == '__main__':
