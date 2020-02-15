@@ -54,6 +54,7 @@ class RollDisplay(qt.QLabel):
     def __init__(self):
         super().__init__()
         self.defaultFont = self.font()
+        self.errorFont = qtgui.QFont('monospace')
 
     def populate(self, tree: EvalTree):
         try:
@@ -71,7 +72,7 @@ class RollDisplay(qt.QLabel):
 
     def show_error(self, error: RollError):
         self.setText(str(error))
-        self.setFont(qtgui.QFont('monospace'))
+        self.setFont(self.errorFont)
         self.setStyleSheet('color: red')
 
 
