@@ -9,6 +9,19 @@ from dndice.lib.exceptions import EvaluationError, RollError, ParseError
 from dndice import compile
 
 
+class EvalTreeCache:
+    def __init__(self):
+        self.cache = {}
+
+    def __getitem__(self, expression: str) -> EvalTree:
+        if expression not in self.cache:
+            try:
+                self.cache[expression] = compile(expression)
+            except ParseError:
+                raise
+        return self.cache[expression]
+
+
 class Roller(qt.QDialog):
     def __init__(self):
         super().__init__()
@@ -20,11 +33,12 @@ class Roller(qt.QDialog):
 
         self.button = qt.QPushButton('Roll')
         self.button.clicked.connect(self.roll)
+        self.cache = EvalTreeCache()
         self._draw()
 
     def roll(self):
         try:
-            self.display.populate(compile(self.entry.text()))
+            self.display.populate(self.cache[self.entry.text()])
         except ParseError as e:
             self.display.show_error(e)
 
@@ -58,6 +72,7 @@ class RollDisplay(qt.QLabel):
 
     def populate(self, tree: EvalTree):
         try:
+            tree.evaluate()
             text = tree.verbose_result()
             color = 'black'
             if tree.is_critical():
