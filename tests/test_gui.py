@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from dndice.lib.evaltree import EvalTree
 from dndice.lib.exceptions import EvaluationError
 
-from dndice.gui import RollDisplay, Roller, RollInput
+from dndice.gui import RollDisplay, Roller, RollInput, History
 
 window = QApplication([])
 
@@ -74,12 +74,25 @@ class TestRollInput(unittest.TestCase):
         self.assertEqual(self.input.text(), '1')
         QTest.keyPress(self.input, '2')
         self.assertEqual(self.input.text(), '12')
+        QTest.keyPress(self.input, Qt.Key_Backspace)
+        self.assertEqual(self.input.text(), '1')
 
     def test_enter_keypress(self):
         self.input.setText('12')
         QTest.keyPress(self.input, Qt.Key_Enter)
         self.assertEqual(self.input.text(), '12')
         self.callback.assert_called_once_with()
+
+    def test_history(self):
+        QTest.keyPress(self.input, '1')
+        QTest.keyPress(self.input, Qt.Key_Enter)
+        QTest.keyPress(self.input, Qt.Key_Backspace)
+        QTest.keyPress(self.input, Qt.Key_Backspace)
+        QTest.keyPress(self.input, '2')
+        QTest.keyPress(self.input, Qt.Key_Up)
+        self.assertEqual(self.input.text(), '1')
+        QTest.keyPress(self.input, Qt.Key_Down)
+        self.assertEqual(self.input.text(), '2')
 
 
 class TestBase(unittest.TestCase):
@@ -100,6 +113,32 @@ class TestBase(unittest.TestCase):
         self.app.entry.setText('14d')
         QTest.mouseClick(self.app.button, Qt.LeftButton)
         self.assertEqual(self.app.display.text(), 'Unexpected end of expression.\n    14d\n       ^')
+
+
+class TestHistory(unittest.TestCase):
+    def test_commit(self):
+        hist = History()
+        self.assertEqual(hist.index, 0)
+        hist.commit()
+        self.assertEqual(hist.index, 1)
+
+    def test_no_move_before_start(self):
+        hist = History()
+        hist.move_up()
+        self.assertEqual(hist.index, 0)
+
+    def test_no_move_past_end(self):
+        hist = History()
+        hist.move_down()
+        self.assertEqual(hist.index, 0)
+
+    def test_update(self):
+        hist = History()
+        hist.update_current('15')
+        self.assertEqual(hist.history[hist.index], '15')
+        current = hist.move_down()
+        self.assertEqual(current, '15')
+        self.assertEqual(hist.index, 0)
 
 
 if __name__ == '__main__':

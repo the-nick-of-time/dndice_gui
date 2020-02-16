@@ -52,16 +52,46 @@ class Roller(qt.QDialog):
         self.setLayout(layout)
 
 
+class History:
+    def __init__(self):
+        self.history = ['']
+        self.index = 0
+
+    def commit(self) -> None:
+        self.history.append('')
+        self.index = len(self.history) - 1
+
+    def move_up(self) -> str:
+        if self.index > 0:
+            self.index -= 1
+        return self.history[self.index]
+
+    def move_down(self) -> str:
+        if self.index < len(self.history) - 1:
+            self.index += 1
+        return self.history[self.index]
+
+    def update_current(self, value: str) -> None:
+        self.history[len(self.history) - 1] = value
+
+
 class RollInput(qt.QLineEdit):
     def __init__(self, populator: Callable[[], None]):
         super().__init__()
         self.callback = populator
+        self.history = History()
 
     def keyPressEvent(self, event: qtgui.QKeyEvent) -> None:
-        if event.key() in (qtcore.Qt.Key_Enter, qtcore.Qt.Key_Return):
+        if event.key() == qtcore.Qt.Key_Down:
+            self.setText(self.history.move_down())
+        elif event.key() == qtcore.Qt.Key_Up:
+            self.setText(self.history.move_up())
+        elif event.key() in (qtcore.Qt.Key_Enter, qtcore.Qt.Key_Return):
+            self.history.commit()
             self.callback()
         else:
             super().keyPressEvent(event)
+            self.history.update_current(self.text())
 
 
 class RollDisplay(qt.QLabel):
