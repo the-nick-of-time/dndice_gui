@@ -123,19 +123,19 @@ class TestHistory(unittest.TestCase):
 
     def test_no_move_before_start(self):
         hist = History()
-        hist.move_up()
+        hist.move_back()
         self.assertEqual(hist.index, 0)
 
     def test_no_move_past_end(self):
         hist = History()
-        hist.move_down()
+        hist.move_forward()
         self.assertEqual(hist.index, 0)
 
     def test_update(self):
         hist = History()
         hist.update_current('15')
         self.assertEqual(hist.history[hist.index], '15')
-        current = hist.move_down()
+        current = hist.move_forward()
         self.assertEqual(current, '15')
         self.assertEqual(hist.index, 0)
 
@@ -150,7 +150,7 @@ class TestHistory(unittest.TestCase):
         hist = History()
         hist.update_current('1')
         hist.commit()
-        hist.move_up()
+        hist.move_back()
         hist.update_current('2')
         self.assertEqual(hist.history[hist.index], '1')
 
