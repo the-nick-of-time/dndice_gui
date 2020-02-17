@@ -57,9 +57,14 @@ class History:
         self.history = ['']
         self.index = 0
 
+    @property
+    def end(self):
+        return len(self.history) - 1
+
     def commit(self) -> None:
-        self.history.append('')
-        self.index = len(self.history) - 1
+        if not (self.end > 0 and self.history[self.end - 1] == self.history[self.end]):
+            self.history.append(self.history[self.index])
+        self.index = self.end
 
     def move_up(self) -> str:
         if self.index > 0:
@@ -67,12 +72,12 @@ class History:
         return self.history[self.index]
 
     def move_down(self) -> str:
-        if self.index < len(self.history) - 1:
+        if self.index < self.end:
             self.index += 1
         return self.history[self.index]
 
     def update_current(self, value: str) -> None:
-        self.history[len(self.history) - 1] = value
+        self.history[self.end] = value
 
 
 class RollInput(qt.QLineEdit):

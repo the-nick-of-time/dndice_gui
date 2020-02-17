@@ -87,7 +87,6 @@ class TestRollInput(unittest.TestCase):
         QTest.keyPress(self.input, '1')
         QTest.keyPress(self.input, Qt.Key_Enter)
         QTest.keyPress(self.input, Qt.Key_Backspace)
-        QTest.keyPress(self.input, Qt.Key_Backspace)
         QTest.keyPress(self.input, '2')
         QTest.keyPress(self.input, Qt.Key_Up)
         self.assertEqual(self.input.text(), '1')
@@ -139,6 +138,21 @@ class TestHistory(unittest.TestCase):
         current = hist.move_down()
         self.assertEqual(current, '15')
         self.assertEqual(hist.index, 0)
+
+    def test_no_empty_trailing(self):
+        hist = History()
+        hist.update_current('1')
+        hist.commit()
+        hist.commit()
+        self.assertEqual(hist.index, 1)
+
+    def test_no_edit_history(self):
+        hist = History()
+        hist.update_current('1')
+        hist.commit()
+        hist.move_up()
+        hist.update_current('2')
+        self.assertEqual(hist.history[hist.index], '1')
 
 
 if __name__ == '__main__':
