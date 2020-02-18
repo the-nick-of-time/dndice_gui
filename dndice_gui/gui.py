@@ -5,10 +5,9 @@ from typing import Callable
 import PyQt5.QtCore as qtcore
 import PyQt5.QtGui as qtgui
 import PyQt5.QtWidgets as qt
+from dndice import compile
 from dndice.lib.evaltree import EvalTree
 from dndice.lib.exceptions import EvaluationError, RollError, ParseError
-
-from dndice import compile
 
 
 class Roller(qt.QDialog):

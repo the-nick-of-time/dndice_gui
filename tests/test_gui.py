@@ -4,10 +4,10 @@ from unittest.mock import MagicMock
 from PyQt5.QtCore import Qt
 from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import QApplication
-from dndice.lib.evaltree import EvalTree
-from dndice.lib.exceptions import EvaluationError
+from dndice_gui.lib.evaltree import EvalTree
+from dndice_gui.lib.exceptions import EvaluationError
 
-from dndice.gui import RollDisplay, Roller, RollInput, History
+from dndice_gui.gui import RollDisplay, Roller, RollInput, History
 
 window = QApplication([])
 

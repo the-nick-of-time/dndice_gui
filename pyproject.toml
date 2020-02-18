@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "dndice"
-version = "2.4.0"
-description = "An engine to parse and evaluate D&D-inspired roll expressions"
+name = "dndice_gui"
+version = "1.0.0"
+description = "A gui for my other repository, dndice, which provides a library for evaluating dice expressions."
 authors = ["Nick Thurmes <nthurmes@gmail.com>"]
 license = "GPL-2.0-or-later"
 readme = "README.md"
@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.5"
 pyqt5 = "^5.13"
 pyqt5-stubs = "^5.13"
+dndice = "^2.4"
 
 [tool.poetry.dev-dependencies]
 nose2 = "^0.9.1"
@@ -17,7 +18,7 @@ sphinx = "^2.1"
 sphinx-rtd-theme = "^0.4.3"
 
 [tool.poetry.scripts]
-roll = "dndice:roller.main"
+dndice = "dndice_gui:gui.main"
 
 [build-system]
 requires = ["poetry>=0.12"]
